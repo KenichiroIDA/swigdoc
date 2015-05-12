@@ -241,6 +241,11 @@
 </pre></div>
 </div>
 <p>hello.java, helloJNI.java, hello_wrap.cppが生成されます。hello.cpp, hello_wrap.cppを動的ライブラリとしてコンパイルするところはPythonの場合と同じです。</p>
+<p>上記のコマンドだと生成されるJavaのコードはパッケージに属さない形式でソースコードが生成されますが、</p>
+<div class="highlight-bash"><div class="highlight"><pre>-package &lt;パッケージ名&gt;
+</pre></div>
+</div>
+<p>を付けてあげれば、そのパッケージに属するようになります。</p>
 <p>コンパイルする際はJNIのヘッダがあるパスを含める必要があります。JNIとはJavaからC/C++関数を呼び出すためにJavaが標準で実装している機構です。SWIGはこのJNI向けのソースコードを生成してくれているということです。</p>
 <ul>
 <li><p class="first">Windows</p>
@@ -272,6 +277,17 @@
 </li>
 </ul>
 <p>ここまでできたらJavaから呼び出せるようになっています。</p>
+<div class="admonition warning">
+<p class="first admonition-title">警告</p>
+<p>SWIGの公式ドキュメントによると、g++に最適化オプション（-O2など）を付ける場合は一緒に-fno-strict-aliasingも付けるべきだと書かれています。gccは4.0から最適化がかかりやすくなったことで最適化をかけてstrict-aliasingが有効になるとC/C++とJava間の型マッピングに失敗するおそれがあるそうです。</p>
+<p>strict-aliasingとは簡単に言うと:</p>
+<div class="highlight-python"><div class="highlight"><pre>int a;
+short* p = (short*)&amp;a;
+</pre></div>
+</div>
+<p>のような、互換性のないキャストに対する操作を無視する最適化です。型のサイズが小さくなる方向にキャストしているので一見安全そうですが、キャストする型間に互換性があるかどうかは言語仕様で決まっている話なので、上記の操作は本来は行うべきではないです。</p>
+<p class="last">-fno-strict-aliasingは上記のような互換性のないキャストに対してそれを考慮したコンパイルをさせるオプションということです。</p>
+</div>
 <div class="literal-block-wrapper container" id="main-java">
 <div class="code-block-caption"><span class="caption-text">Main.java</span><a class="headerlink" href="#main-java" title="このコードへのパーマリンク">¶</a></div>
 <div class="highlight-java"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
